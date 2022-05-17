@@ -1,4 +1,5 @@
 const config = require("./config");
+const util = require("util");
 
 // Mongo DB Connection
 
@@ -27,6 +28,9 @@ connection.connect(function(err){
     }
 });
  
-module.exports = connection;
+
+const query = util.promisify(connection.query).bind(connection);
+
+module.exports = query;
 
  

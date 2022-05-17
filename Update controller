@@ -23,7 +23,7 @@ const email_validate = require("../../../helper/email-validation");
 const mysqlcon = require('../../../config/db_connection');
 const { exit } = require("process");
 
-console.log(mysqlcon);
+// console.log(mysqlcon);
 const loginCont = { 
     register: async function(req, res){ 
         // var url = 'google.com';
@@ -53,13 +53,16 @@ const loginCont = {
                             sql = 'select id, email from tbl_user where email = ? AND id != ?';
                             var em = [request.email, request.user_id];
                         }
-                        var dbquery  = await mysqlcon(sql, em)
-                            // console.log(dbquery);
+                        var dbquery  = await mysqlcon.query(sql, em, function (err, results) { 
+                            // console.log(results);
                             // console.log(err);
-                            //  console.log(dbquery[0]);
+                            //  console.log(results[0]);
                             //  console.log('1');  
-                            
-                            if(!dbquery[0]){ 
+                            if(err){  
+                                console.log('Query : ', dbquery.sql);
+                                res.status(201).json({status:false, message:'Something went wrong', data: []}); 
+                            }
+                            if(!results[0]){ 
                                 if(user_id){
                                     var user_data = {  
                                         email : request.email,
@@ -67,15 +70,15 @@ const loginCont = {
                                         updated_on : formatted_date, 
                                     };
                                     sql = 'UPDATE tbl_user SET ? WHERE id = ? ';
-                                    var dbquery  = await mysqlcon(sql, [user_data, user_id])
-                                    if(!dbquery){
-                                        res.status(201).json({status:false, message:'Error to create profile', data: []});  
-                                    }
-                                    else{
+                                    var dbquery  = mysqlcon.query(sql, [user_data, user_id], (err, results) => { 
+                                        if(err){
+                                            res.status(201).json({status:false, message:'Error to create profile', data: []});  
+                                        }
+                                        else{
 
-                                        res.status(200).json({status:true, message:'Profile saved successfully', data: dbquery.insertId});  
-                                    }
-                                    
+                                            res.status(200).json({status:true, message:'Profile saved successfully', data: results.insertId});  
+                                        }
+                                    }); 
                                 }
                                 else{
                                     // console.log('2');      
@@ -98,27 +101,28 @@ const loginCont = {
                                         updated_on : formatted_date,
                                         verification_token : token 
                                     };
-
-                                    let result = await mysqlcon('INSERT INTO tbl_user SET ?', user_data);
-                                    if(!result){
-                                        res.status(201).json({status:false, message:'Error to create profile', data: []});  
-                                    }
-                                    else{
-                                        jwt.sign({id:result.insertId},config.JWT_SECRET,{expiresIn:config.JWT_EXPIRY},(err,token)=>{
-                                            if(err) throw new Error(err);
-                                            var reg = {
-                                                id: result.insertId,
-                                                user_id : result.insertId,
-                                                token : token,
-                                            };                                                
-                                            res.status(200).json({status:false, message:'Profile created successfully', data: reg}); 
-                                        }); 
-                                    }
+                                    mysqlcon.query('INSERT INTO tbl_user SET ?', user_data, (err, results) => {
+                                        if(err){
+                                            res.status(201).json({status:false, message:'Error to create profile', data: []});  
+                                        }
+                                        else{
+                                            jwt.sign({id:results.insertId},config.JWT_SECRET,{expiresIn:config.JWT_EXPIRY},(err,token)=>{
+                                                if(err) throw new Error(err);
+                                                var reg = {
+                                                    id: results.insertId,
+                                                    user_id : results.insertId,
+                                                    token : token,
+                                                };                                                
+                                                res.status(200).json({status:false, message:'Profile created successfully', data: reg}); 
+                                            }); 
+                                        }
+                                    });
                                 }  
                             }
                             else{
                                 res.status(202).json({status:false, message:'Email id already exists', data:  []}); 
                             }
+                        }); 
                     }
                     else{ 
                         res.status(201).json({status:false, message:'Enter a valid password', data: [] }); 
@@ -133,7 +137,6 @@ const loginCont = {
             }
         }
         catch(e) {
-            console.log(e)
             res.status(500).json({status:false, message:'Error to complete task.', data: [] }); 
         }
         finally {
@@ -155,12 +158,18 @@ const loginCont = {
                 var req_str = '';
                 var req_arr = [];
                 for (const key  in validate_req) {
-                    // console.log(request[validate_req[key]]);
-                    if(!request[validate_req[key]] ){ 
-                        req_str += ('<p>'+ validate_req[key]  + ' is required </p>');
-                        req_arr.push( validate_req[key]);
+                    try{
+                        // console.log(request[validate_req[key]]);
+                        if(!request[validate_req[key]] ){ 
+                            req_str += ('<p>'+ validate_req[key]  + ' is required </p>');
+                            req_arr.push( validate_req[key]);
+                        }
+                    }
+                    catch(exc){
+                        res.status(201).json({status:false, message: 'Something went wrong, try again later', data: []}); 
                     }
                 }
+
             
                 if(req_arr.length > 0){     
                     // console.log('hdfgghgf', req_arr);               
@@ -183,11 +192,12 @@ const loginCont = {
                 };
 
                 sql = 'UPDATE tbl_user SET ? WHERE id = ? ';
-                let dbquery  = await mysqlcon(sql, [company_data, user_id]);
-                // console.log(dbquery.sql);
-                if(dbquery){                    
-                    res.status(200).json({status:true, message:'Saved successfully', data: []});  
-                }            
+                var dbquery  = mysqlcon.query(sql, [company_data, user_id], (err, results) => { 
+                    // console.log(dbquery.sql);
+                    if(results){                    
+                        res.status(200).json({status:true, message:'Saved successfully', data: []});  
+                    }
+                });
                
             }
             else{
@@ -214,10 +224,15 @@ const loginCont = {
                 var req_str = '';
                 var req_arr = [];
                 for (const key  in validate_req) {
-                    // console.log(request[validate_req[key]]);
-                    if(!request[validate_req[key]] ){ 
-                        req_str += ('<p>'+ validate_req[key]  + ' is required </p>');
-                        req_arr.push( validate_req[key]);
+                    try{
+                        // console.log(request[validate_req[key]]);
+                        if(!request[validate_req[key]] ){ 
+                            req_str += ('<p>'+ validate_req[key]  + ' is required </p>');
+                            req_arr.push( validate_req[key]);
+                        }
+                    }
+                    catch(exc){
+                        res.status(201).json({status:false, message: 'Something went wrong, try again later', data: []}); 
                     }
                 }
                 
@@ -236,11 +251,12 @@ const loginCont = {
                 };
 
                 sql = 'UPDATE tbl_user SET ? WHERE id = ? ';
-                var dbquery  = mysqlcon(sql, [company_data, user_id]);
+                var dbquery  = mysqlcon.query(sql, [company_data, user_id], (err, results) => { 
                     // console.log(dbquery.sql);
-                    if(dbquery){                    
+                    if(results){                    
                         res.status(200).json({status:true, message:'Saved successfully', data: []});  
                     }
+                });
                
             }
             else{
@@ -268,10 +284,15 @@ const loginCont = {
                 var req_str = '';
                 var req_arr = [];
                 for (const key  in validate_req) {
-                    // console.log(request[validate_req[key]]);
-                    if(!request[validate_req[key]] ){ 
-                        req_str += ('<p>'+ validate_req[key]  + ' is required </p>');
-                        req_arr.push( validate_req[key]);
+                    try{
+                        // console.log(request[validate_req[key]]);
+                        if(!request[validate_req[key]] ){ 
+                            req_str += ('<p>'+ validate_req[key]  + ' is required </p>');
+                            req_arr.push( validate_req[key]);
+                        }
+                    }
+                    catch(exc){
+                        res.status(201).json({status:false, message: 'Something went wrong, try again later', data: []}); 
                     }
                 }
                 
@@ -297,12 +318,13 @@ const loginCont = {
                 }; 
 
                 sql = 'UPDATE tbl_user SET ? WHERE id = ? ';
-                var dbquery  = mysqlcon(sql, [director_info, user_id])
+                var dbquery  = mysqlcon.query(sql, [director_info, user_id], (err, results) => { 
                     // console.log(dbquery.sql);
-                    if(dbquery){                    
+                    if(results){                    
                         res.status(200).json({status:true, message:'Saved successfully', data: []});  
                     }
-                
+                });
+               
             }
             else{
                 res.status(201).json({status:false, message:'Director informations are required', data: [] }); 
@@ -328,13 +350,16 @@ const loginCont = {
                 var req_str = '';
                 var req_arr = [];
                 for (const key  in validate_req) {
-
-                    // console.log(request[validate_req[key]]);
-                    if(!request[validate_req[key]] ){ 
-                        req_str += ('<p>'+ validate_req[key]  + ' is required </p>');
-                        req_arr.push( validate_req[key]);
+                    try{
+                        // console.log(request[validate_req[key]]);
+                        if(!request[validate_req[key]] ){ 
+                            req_str += ('<p>'+ validate_req[key]  + ' is required </p>');
+                            req_arr.push( validate_req[key]);
+                        }
                     }
-                    
+                    catch(exc){
+                        res.status(201).json({status:false, message: 'Something went wrong, try again later', data: []}); 
+                    }
                 }
                 
                 if(req_arr.length > 0){     
@@ -359,11 +384,12 @@ const loginCont = {
                 }; 
 
                 sql = 'UPDATE tbl_user SET ? WHERE id = ? ';
-                var dbquery  = mysqlcon(sql, [shareholder_info, user_id])
+                var dbquery  = mysqlcon.query(sql, [shareholder_info, user_id], (err, results) => { 
                     // console.log(dbquery.sql);
-                    if(dbquery){                    
+                    if(results){                    
                         res.status(200).json({status:true, message:'Saved successfully', data: []});  
-                    }               
+                    }
+                });               
             }
             else{
                 res.status(201).json({status:false, message:'Shareholder informations are required', data: [] }); 
@@ -389,10 +415,15 @@ const loginCont = {
                 var req_str = '';
                 var req_arr = [];
                 for (const key  in validate_req) {
-                    // console.log(request[validate_req[key]]);
-                    if(!request[validate_req[key]] ){ 
-                        req_str += ('<p>'+ validate_req[key]  + ' is required </p>');
-                        req_arr.push( validate_req[key]);
+                    try{
+                        // console.log(request[validate_req[key]]);
+                        if(!request[validate_req[key]] ){ 
+                            req_str += ('<p>'+ validate_req[key]  + ' is required </p>');
+                            req_arr.push( validate_req[key]);
+                        }
+                    }
+                    catch(exc){
+                        res.status(201).json({status:false, message: 'Something went wrong, try again later', data: []}); 
                     }
                 }
                 
@@ -415,12 +446,12 @@ const loginCont = {
                 }; 
 
                 sql = 'UPDATE tbl_user SET ? WHERE id = ? ';
-                var dbquery  = mysqlcon.query(sql, [business_info, user_id]);
+                var dbquery  = mysqlcon.query(sql, [business_info, user_id], (err, results) => { 
                     // console.log(dbquery.sql);
-                    if(dbquery){                    
+                    if(results){                    
                         res.status(200).json({status:true, message:'Saved successfully', data: []});  
                     }
-            
+                });               
             }
             else{
                 res.status(201).json({status:false, message:'Business informations are required', data: [] }); 
@@ -447,10 +478,15 @@ const loginCont = {
                 var req_str = '';
                 var req_arr = [];
                 for (const key  in validate_req) {
-                    // console.log(request[validate_req[key]]);
-                    if(!request[validate_req[key]] ){ 
-                        req_str += ('<p>'+ validate_req[key]  + ' is required </p>');
-                        req_arr.push( validate_req[key]);
+                    try{
+                        // console.log(request[validate_req[key]]);
+                        if(!request[validate_req[key]] ){ 
+                            req_str += ('<p>'+ validate_req[key]  + ' is required </p>');
+                            req_arr.push( validate_req[key]);
+                        }
+                    }
+                    catch(exc){
+                        res.status(201).json({status:false, message: 'Something went wrong, try again later', data: []}); 
                     }
                 }
                 
@@ -470,11 +506,12 @@ const loginCont = {
                 }; 
 
                 sql = 'UPDATE tbl_user SET ? WHERE id = ? ';
-                var dbquery  = mysqlcon.query(sql, [settelment_info, user_id])
+                var dbquery  = mysqlcon.query(sql, [settelment_info, user_id], (err, results) => { 
                     // console.log(dbquery.sql);
-                    if(dbquery){                    
+                    if(results){                    
                         res.status(200).json({status:true, message:'Saved successfully', data: []});  
-                    }              
+                    }
+                });               
             }
             else{
                 res.status(201).json({status:false, message:'Settelment informations are required', data: [] }); 
@@ -496,20 +533,20 @@ const loginCont = {
                     var password = request.password;
                     if(password){ 
                         sql = 'SELECT  * FROM tbl_user where email = ? AND password = ?';
-                        var dbquery  = await mysqlcon.query(sql, [request.email, md5(request.password)])
+                        var dbquery  = await mysqlcon.query(sql, [request.email, md5(request.password)], function (err, results) {
                             if(err){  
                                 // console.log('Query : ', dbquery.sql);
                                 res.status(201).json({status:false, message:'Something went wrong', data: []}); 
                             }
-                            if(dbquery[0]){ 
-                                if(dbquery[0].complete_profile == 1){
-                                    if(dbquery[0].status == 1){
-                                        // console.log(dbquery);
-                                    let token = await jwt.sign({id:dbquery[0].id},config.JWT_SECRET,{expiresIn:config.JWT_EXPIRY})
+                            if(results[0]){ 
+                                if(results[0].complete_profile == 1){
+                                    if(results[0].status == 1){
+                                        // console.log(results);
+                                        jwt.sign({id:results[0].id},config.JWT_SECRET,{expiresIn:config.JWT_EXPIRY},(err,token)=>{
                                             if(err) throw new Error(err);
-                                            dbquery[0]['token'] = token;
-                                            res.status(202).json({status:false, message:'Login successfully', data: dbquery[0]}); 
-                                        
+                                            results[0]['token'] = token;
+                                            res.status(202).json({status:false, message:'Login successfully', data: results[0]}); 
+                                        });
                                     }
                                     else{
                                         res.status(201).json({status:false, message:'Your profile is active now, It is in under-review wait 24 hours.', data:  []});
@@ -522,7 +559,7 @@ const loginCont = {
                             else{
                                 res.status(201).json({status:false, message:'You entered a wrong credentials.', data:  []}); 
                             }
-                        
+                        });
                     }
                     else{ 
                         res.status(201).json({status:false, message:'Enter a valid password', data: [] }); 
@@ -552,11 +589,15 @@ const loginCont = {
             let users = req.user; 
             if(users){
                 sql = 'SELECT * FROM countries WHERE 1 ORDER BY name ASC';
-                var dbquery  = await mysqlcon(sql);
-                    if(dbquery){  
-                        res.status(200).json({status:false, message:'Country list get successfully', data: dbquery});                        
+                var dbquery  = await mysqlcon.query(sql,  function (err, results) {
+                    if(err){  
+                        // console.log('Query : ', dbquery.sql);
+                        res.status(201).json({status:false, message:'Country List not found', data: []}); 
+                    }
+                    if(results){  
+                        res.status(200).json({status:false, message:'Country list get successfully', data: results});                        
                     }                
-
+                });
             }
             else{ 
                 res.status(201).json({status:false, message:'Authentication Failed.', data: [] }); 
@@ -578,16 +619,16 @@ const loginCont = {
             let users = req.user; 
             if(users){
                 sql = 'SELECT  * FROM countries where status = 1';
-                var results  = await mysqlcon(sql);
+                var dbquery  = await mysqlcon.query(sql,  function (err, results) {
                     if(err){  
-                        // console.log('Query : ', results.sql);
+                        // console.log('Query : ', dbquery.sql);
                         res.status(201).json({status:false, message:'Solution apply countries not found', data: []}); 
                     }
                     if(results){
                         sql = 'SELECT  * FROM payment_method where status = 1';
-                        var payment_method  = mysqlcon(sql)
+                        var dbquery  = mysqlcon.query(sql,  function (err, payment_method) {
                             if(err){  
-                                // console.log('Query : ', payment_method.sql);
+                                // console.log('Query : ', dbquery.sql);
                                 res.status(201).json({status:false, message:'Solution apply countries not found', data: []}); 
                             }
                             if(payment_method){ 
@@ -610,8 +651,9 @@ const loginCont = {
                                 }
                                 res.status(200).json({status:false, message:'Solution Countries and solution apply are get successfully', data: results});
                             }
+                        }) 
                     }
-                
+                });
             }
             else{ 
                 res.status(201).json({status:false, message:'Authentication Failed.', data: [] }); 
@@ -628,13 +670,13 @@ const loginCont = {
     },
   
     testsql : async function(req, res){
-        let results = await mysqlcon('SELECT *from user');
+        mysqlcon.query('SELECT *from user', function (error, results) {
         if (error) throw error;
             console.log('The error: ', error );
             // console.log('The result: ', results );
             // console.log('fields: ', fields );
             res.send(results);
-        
+        });
     }
 }
 

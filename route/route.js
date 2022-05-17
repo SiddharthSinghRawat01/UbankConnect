@@ -1,4 +1,5 @@
 const loginController = require('../modules/login/Controller/loginController');
+const dashbordController = require('../modules/login/Controller/dashbordController');
 const route = require("express").Router();
 const path = require("path");
 const multer = require("multer");
@@ -19,6 +20,7 @@ const uploads = multer({ storage: storage });
 
 const helper = require("../helper/jwt");
 const username = require("../helper/username");
+const dashboardCount = require('../modules/login/Controller/dashbordController');
 // const email_validate = require("../helper/email-validation");
 
 const views = (path.join(__dirname , '../views/'));
@@ -46,6 +48,10 @@ route.post('/save-director-info', uploads.none(), helper.verify, loginController
 // route.post('/user-list', uploads.none(), helper.verify, userController.get_users);
 
 route.post('/sqltest', uploads.none(), helper.verify, loginController.testsql);
+
+// dashboard controller
+
+route.get('/payout',uploads.none(),helper.verify, dashbordController.payout);
 
 
 module.exports = route;

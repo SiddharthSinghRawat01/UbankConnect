@@ -9,7 +9,7 @@ const jwt = {
                 if(err) return res.send(err);
                 let id  = payload.id; 
                 // console.log(id);
-                mysqlcon.query('SELECT * FROM tbl_user WHERE id = ?', [id], (err, results) => {
+                mysqlcon('SELECT * FROM tbl_user WHERE id = ?', [id], (err, results) => {
                     if(err){
                         res.status(201).json({status:false, message:'Authentication Failed', data: []});  
                     }
