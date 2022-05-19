@@ -51,7 +51,8 @@ route.post('/sqltest', uploads.none(), helper.verify, loginController.testsql);
 
 // dashboard controller
 
-route.get('/payout',uploads.none(),helper.verify, dashbordController.payout);
+route.get('/payout_icon',uploads.none(),helper.verify, dashbordController.payout_icon);
+route.get('/deposits_icon',uploads.none(),helper.verify, dashbordController.deposits_icon);
 
 
 module.exports = route;

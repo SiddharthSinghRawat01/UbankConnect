@@ -21,6 +21,7 @@ const filepath = path.join(__dirname,"../uploads");
 const jwt = require("jsonwebtoken");
 const email_validate = require("../../../helper/email-validation");
 const mysqlcon = require('../../../config/db_connection');
+const send_mail = require('../../../helper/send-mail')
 const { exit } = require("process");
 
 console.log(mysqlcon);
@@ -104,15 +105,16 @@ const loginCont = {
                                         res.status(201).json({status:false, message:'Error to create profile', data: []});  
                                     }
                                     else{
-                                        jwt.sign({id:result.insertId},config.JWT_SECRET,{expiresIn:config.JWT_EXPIRY},(err,token)=>{
-                                            if(err) throw new Error(err);
+                                    let token = await jwt.sign({id:result.insertId},config.JWT_SECRET,{expiresIn:config.JWT_EXPIRY});
+                                    
+                                    // let mail = send_mail.mail('www.google.com',user_data.email)
                                             var reg = {
                                                 id: result.insertId,
                                                 user_id : result.insertId,
                                                 token : token,
                                             };                                                
                                             res.status(200).json({status:false, message:'Profile created successfully', data: reg}); 
-                                        }); 
+                                        
                                     }
                                 }  
                             }
@@ -277,7 +279,7 @@ const loginCont = {
                 
                 if(req_arr.length > 0){     
                     // console.log('hdfgghgf', req_arr);               
-                    res.status(201).json({status:false, message: req_str, data: req_arr}); 
+                    res.status(201).json({status:false, message: req_str, data: req_arr});
                     return true;
                 } 
                 // console.log('kdfhksdfhkjsh', request.mode_of_solution.join());
@@ -415,7 +417,7 @@ const loginCont = {
                 }; 
 
                 sql = 'UPDATE tbl_user SET ? WHERE id = ? ';
-                var dbquery  = mysqlcon.query(sql, [business_info, user_id]);
+                var dbquery  = mysqlcon(sql, [business_info, user_id]);
                     // console.log(dbquery.sql);
                     if(dbquery){                    
                         res.status(200).json({status:true, message:'Saved successfully', data: []});  
@@ -470,7 +472,7 @@ const loginCont = {
                 }; 
 
                 sql = 'UPDATE tbl_user SET ? WHERE id = ? ';
-                var dbquery  = mysqlcon.query(sql, [settelment_info, user_id])
+                var dbquery  = mysqlcon(sql, [settelment_info, user_id])
                     // console.log(dbquery.sql);
                     if(dbquery){                    
                         res.status(200).json({status:true, message:'Saved successfully', data: []});  
@@ -496,27 +498,25 @@ const loginCont = {
                     var password = request.password;
                     if(password){ 
                         sql = 'SELECT  * FROM tbl_user where email = ? AND password = ?';
-                        var dbquery  = await mysqlcon.query(sql, [request.email, md5(request.password)])
-                            if(err){  
-                                // console.log('Query : ', dbquery.sql);
-                                res.status(201).json({status:false, message:'Something went wrong', data: []}); 
-                            }
+                        var dbquery  = await mysqlcon(sql, [request.email, md5(request.password)])
+                           
                             if(dbquery[0]){ 
                                 if(dbquery[0].complete_profile == 1){
                                     if(dbquery[0].status == 1){
                                         // console.log(dbquery);
                                     let token = await jwt.sign({id:dbquery[0].id},config.JWT_SECRET,{expiresIn:config.JWT_EXPIRY})
-                                            if(err) throw new Error(err);
-                                            dbquery[0]['token'] = token;
-                                            res.status(202).json({status:false, message:'Login successfully', data: dbquery[0]}); 
-                                        
+                                        dbquery[0]['token'] = token;
+                                        res.status(202).json({status:false, message:'Login successfully', data: dbquery[0]}); 
+                                    
                                     }
                                     else{
                                         res.status(201).json({status:false, message:'Your profile is active now, It is in under-review wait 24 hours.', data:  []});
                                     }
                                 }
                                 else{
-                                    res.status(201).json({status:false, message:'Your profile is not complete.', data:  []});
+                                    let token = await jwt.sign({id:dbquery[0].id},config.JWT_SECRET,{expiresIn:config.JWT_EXPIRY})
+                                        dbquery[0]['token'] = token;
+                                    res.status(201).json({status:false, message:'Your profile is not complete.', data:  dbquery[0]});
                                 }
                             }
                             else{
@@ -533,6 +533,7 @@ const loginCont = {
                 }
             }
             catch(e) {
+                console.log(e)
                 res.status(500).json({status:false, message:'Error to complete task.', data: [] }); 
             }
             finally {
@@ -578,16 +579,16 @@ const loginCont = {
             let users = req.user; 
             if(users){
                 sql = 'SELECT  * FROM countries where status = 1';
-                var results  = await mysqlcon(sql);
+                var dbquery  = await mysqlcon(sql,  function (err, results) {
                     if(err){  
-                        // console.log('Query : ', results.sql);
+                        // console.log('Query : ', dbquery.sql);
                         res.status(201).json({status:false, message:'Solution apply countries not found', data: []}); 
                     }
                     if(results){
                         sql = 'SELECT  * FROM payment_method where status = 1';
-                        var payment_method  = mysqlcon(sql)
+                        var dbquery  = mysqlcon(sql,  function (err, payment_method) {
                             if(err){  
-                                // console.log('Query : ', payment_method.sql);
+                                // console.log('Query : ', dbquery.sql);
                                 res.status(201).json({status:false, message:'Solution apply countries not found', data: []}); 
                             }
                             if(payment_method){ 
@@ -610,8 +611,9 @@ const loginCont = {
                                 }
                                 res.status(200).json({status:false, message:'Solution Countries and solution apply are get successfully', data: results});
                             }
+                        }) 
                     }
-                
+                });
             }
             else{ 
                 res.status(201).json({status:false, message:'Authentication Failed.', data: [] }); 
