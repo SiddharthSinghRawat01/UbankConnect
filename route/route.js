@@ -53,6 +53,15 @@ route.post('/sqltest', uploads.none(), helper.verify, loginController.testsql);
 
 route.get('/payout_icon',uploads.none(),helper.verify, dashbordController.payout_icon);
 route.get('/deposits_icon',uploads.none(),helper.verify, dashbordController.deposits_icon);
+route.get('/daily_sale_count_icon',uploads.none(),helper.verify, dashbordController.daily_sale_count_icon);
 
+route.post('/dpc_today',uploads.none(),helper.verify, dashbordController.dpc_today);
+route.post('/payment_type',uploads.none(),helper.verify, dashbordController.payment_type);
+
+route.post('/top_transaction_today',uploads.none(),helper.verify, dashbordController.top_transaction_today);
+route.post('/transaction_overview_month',uploads.none(),helper.verify, dashbordController.transaction_overview_month);
+
+route.post('/success_rate',uploads.none(),helper.verify, dashbordController.success_rate);
+route.post('/card_data',uploads.none(),helper.verify, dashbordController.card_data);
 
 module.exports = route;
