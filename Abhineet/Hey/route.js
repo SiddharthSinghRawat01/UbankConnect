@@ -1,6 +1,6 @@
 const loginController = require('../modules/login/Controller/loginController');
-const dashbordController = require('../modules/login/Controller/dashbordController');
 const payoutController = require('../modules/login/Controller/payoutController');
+const dashbordController = require('../modules/login/Controller/dashbordController');
 const route = require("express").Router();
 const path = require("path");
 const multer = require("multer");
@@ -52,34 +52,7 @@ route.post('/sqltest', uploads.none(), helper.verify, loginController.testsql);
 
 // dashboard controller
 
-route.post('/payout_icon',uploads.none(),helper.verify, dashbordController.payout_icon);
-route.post('/deposits_icon',uploads.none(),helper.verify, dashbordController.deposits_icon);
-route.post('/daily_sale_count_icon',uploads.none(),helper.verify, dashbordController.daily_sale_count_icon);
-
-route.post('/dpc_today',uploads.none(),helper.verify, dashbordController.dpc_today);
-route.post('/payment_type',uploads.none(),helper.verify, dashbordController.payment_type);
-
-route.post('/top_transaction_today',uploads.none(),helper.verify, dashbordController.top_transaction_today);
-route.post('/transaction_overview_month',uploads.none(),helper.verify, dashbordController.transaction_overview_month);
-
-route.post('/success_rate',uploads.none(),helper.verify, dashbordController.success_rate);
-route.post('/card_data',uploads.none(),helper.verify, dashbordController.card_data);
-
-/////////////////////
-
-
-// Payout Controller
-route.post('/searchByOrderId',uploads.none(), helper.verify, payoutController.searchByOrderId)
-route.post('/today',uploads.none(), helper.verify, payoutController.today)
-// route.post('/yesterday',uploads.none(), helper.verify, payoutController.yesterday)
-route.post('/customDate',uploads.none(), helper.verify, payoutController.customDate)
-route.post('/success',uploads.none(), helper.verify, payoutController.success)
-route.post('/declined',uploads.none(), helper.verify, payoutController.declined)
-route.post('/pending',uploads.none(), helper.verify, payoutController.pending)
-route.post('/total',uploads.none(), helper.verify, payoutController.total)
-route.post('/viewDetails',uploads.none(), helper.verify, payoutController.viewDetails)
-route.post('/downloadReport',uploads.none(), helper.verify, payoutController.downloadReport)
-
+route.get('/payout',uploads.none(),helper.verify, dashbordController.payout);
 
 
 module.exports = route;

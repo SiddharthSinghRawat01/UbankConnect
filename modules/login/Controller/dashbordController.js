@@ -236,15 +236,15 @@ top_transaction_today: async function (req, res) {
         var d2 = new Date();
         let sdate2 = d2.toLocaleString().slice(0, 10);
         let start_week = sdate2.slice(6, 10) + "-" + sdate2.slice(3, 5) + "-" + sdate2.slice(0, 2)
-        d2.setDate(d.getDate() - 6);
-        let s_week_date = d.toLocaleString().slice(0, 10);
+        d2.setDate(d2.getDate() - 6);
+        let s_week_date = d2.toLocaleString().slice(0, 10);
         let end_week = s_week_date.slice(6, 10) + "-" + s_week_date.slice(3, 5) + "-" + s_week_date.slice(0, 2)
 
         // month
         var d3 = new Date();
-        let sdate3 = d.toLocaleString().slice(0, 10);
+        let sdate3 = d3.toLocaleString().slice(0, 10);
         let start_month = sdate3.slice(6, 10) + "-" + sdate3.slice(3, 5) + "-" + sdate3.slice(0, 2)
-        d.setDate(d.getDate() - 29);
+        d.setDate(d3.getDate() - 29);
         let s_month_date = d3.toLocaleString().slice(0, 10);
         let end_month = s_month_date.slice(6, 10) + "-" + s_month_date.slice(3, 5) + "-" + s_month_date.slice(0, 2)
     
@@ -254,12 +254,12 @@ top_transaction_today: async function (req, res) {
 
         let result;
 
-        let one = request.one_
-        let two = request.two_
-        let three = request.three_
+        let Day = request.day
+        let Week = request.week
+        let Month = request.month
 
         // day
-        if(one){
+        if(Day){
           
             sql = "select i_flname,payment_type,currency,tbl_merchant_transaction.created_on,ammount,tbl_icici_payout_transaction_response_details.status from tbl_merchant_transaction inner join tbl_icici_payout_transaction_response_details on tbl_merchant_transaction.user_id=tbl_icici_payout_transaction_response_details.users_id WHERE DATE(tbl_merchant_transaction.created_on) = ? AND user_id = ?"
 
@@ -268,7 +268,7 @@ top_transaction_today: async function (req, res) {
         }
 
         // weeks
-        if(two){
+        if(Week){
             
             sql = "select i_flname,payment_type,currency,tbl_merchant_transaction.created_on,ammount,tbl_icici_payout_transaction_response_details.status from tbl_merchant_transaction inner join tbl_icici_payout_transaction_response_details on tbl_merchant_transaction.user_id=tbl_icici_payout_transaction_response_details.users_id WHERE DATE(tbl_merchant_transaction.created_on) BETWEEN ? AND ? AND user_id = ?"
 
@@ -276,7 +276,7 @@ top_transaction_today: async function (req, res) {
         }
 
         //months
-        if(three){
+        if(Month){
            
             sql = "select i_flname,payment_type,currency,tbl_merchant_transaction.created_on,ammount,tbl_icici_payout_transaction_response_details.status from tbl_merchant_transaction inner join tbl_icici_payout_transaction_response_details on tbl_merchant_transaction.user_id=tbl_icici_payout_transaction_response_details.users_id WHERE DATE(tbl_merchant_transaction.created_on) BETWEEN ? AND ? AND user_id = ?"
 
@@ -373,8 +373,8 @@ transaction_overview_week: async function (req, res) {
                     data = result;
                     mysqlcon.query(sql2, (err, resultt) => {
                         for (let i = 0; i < data.length; i++) {
-                            let tt = 0;
-                            if (tt < resultt.length) {
+                            let t = 0;
+                            if (t < resultt.length) {
                                 data[i]['payout'] = resultt[0].payout
                                 tt += 1
 
