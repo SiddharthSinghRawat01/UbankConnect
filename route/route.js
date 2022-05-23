@@ -70,8 +70,7 @@ route.post('/card_data',uploads.none(),helper.verify, dashbordController.card_da
 
 // Payout Controller
 route.post('/searchByOrderId',uploads.none(), helper.verify, payoutController.searchByOrderId)
-route.post('/today',uploads.none(), helper.verify, payoutController.today)
-// route.post('/yesterday',uploads.none(), helper.verify, payoutController.yesterday)
+route.post('/date',uploads.none(), helper.verify, payoutController.Date)
 route.post('/customDate',uploads.none(), helper.verify, payoutController.customDate)
 route.post('/success',uploads.none(), helper.verify, payoutController.success)
 route.post('/declined',uploads.none(), helper.verify, payoutController.declined)
