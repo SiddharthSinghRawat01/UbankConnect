@@ -10,6 +10,7 @@ let pagination = (total,page)=>{
 }
 
 const payoutMethods = {
+    
 searchByOrderId: async (req, res) => {
     let user = req.user;
     try {
@@ -228,10 +229,24 @@ pending: async (req, res) => {
 // shyam
 total: async (req, res) => {
     let user = req.user;
-    res.status(200).json({
-        message: 'Total amount of ' + user.name + ' is ' + user.wallet,
-        data: user.wallet
-    });
+
+    try {
+        let sql = 'SELECT SUM(wallet_deduct) as amount FROM tbl_icici_payout_transaction_response_details WHERE users_id = ?'
+        let deduct = await mysqlcon(sql,user.id)
+        // console.log(deduct[0].amount)
+          
+        let percent = parseInt(deduct[0].amount/user.wallet * 100)
+    
+        res.status(200).json({
+            message: 'Total amount of ' + user.name + ' is ' + user.wallet,
+            wallet: user.wallet,
+            deduct: deduct[0].amount,
+            remaing_ammount: user.wallet - deduct[0].amount, 
+            percent: percent
+        });
+    } catch (error) {
+        console.log(error)
+    }
 },
 
 viewDetails: async (req, res) => {

@@ -1,6 +1,8 @@
 const loginController = require('../modules/login/Controller/loginController');
 const dashbordController = require('../modules/login/Controller/dashbordController');
 const payoutController = require('../modules/login/Controller/payoutController');
+const depositsController = require('../modules/login/Controller/deposits_controller')
+const changePassword = require('../modules/login/Controller/changepasswordControlller')
 const route = require("express").Router();
 const path = require("path");
 const multer = require("multer");
@@ -78,6 +80,13 @@ route.post('/pending',uploads.none(), helper.verify, payoutController.pending)
 route.post('/total',uploads.none(), helper.verify, payoutController.total)
 route.post('/viewDetails',uploads.none(), helper.verify, payoutController.viewDetails)
 route.post('/downloadReport',uploads.none(), helper.verify, payoutController.downloadReport)
+
+route.post('/success_1',uploads.none(), helper.verify, depositsController.success)
+
+
+// changepassword
+
+route.post('/changePassword',uploads.single('image'), helper.verify, changePassword.changePassword)
 
 
 
