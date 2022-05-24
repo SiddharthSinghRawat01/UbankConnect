@@ -45,7 +45,7 @@ try {
 
     let = sql ="select sum(amount) as payout ,time(created_on) as time from tbl_icici_payout_transaction_response_details WHERE user_id = ? AND TIME(created_on) BETWEEN ? AND ? and date(created_on)= date(now()) GROUP by time(created_on);"
 
-    let found = await mysqlcon(sql,[user_id],[interval]);
+    let found = await mysqlcon(sql,[user_id,interval.Start,interval.End]);
 
     return res.json({
         status: 200,

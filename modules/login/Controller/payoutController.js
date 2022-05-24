@@ -1,7 +1,7 @@
 const mysqlcon = require('../../../config/db_connection');
 
 let pagination = (total,page)=>{
-    let limit = 10;
+    let limit = 15;
 
     let numOfPages = Math.ceil(total / limit)
     let start = ((page * limit) - (limit))
@@ -15,8 +15,8 @@ searchByOrderId: async (req, res) => {
     let user = req.user;
     try {
         const { uniqueid } = req.body;
-        let sql = 'SELECT * FROM tbl_icici_payout_transaction_response_details WHERE users_id = ? AND uniqueid LIKE ?';
-        let result = await mysqlcon(sql, [user.id,`%${uniqueid}%`]);
+        let sql = 'SELECT * FROM tbl_icici_payout_transaction_response_details WHERE users_id = ?';
+        let result = await mysqlcon(sql,user.id);
         console.log(`%${uniqueid}%`)
         
             if (result.length === 0) {
@@ -170,7 +170,7 @@ declined: async (req, res) => {
                 });
             }
             
-            let percent = (result[0].count/total * 100)
+            let percent = Math.round(result[0].count/total * 100)
             return res.status(200).json({
                 message: 'Total failuer amount of ' + user.name + ' is ' + result[0].amount,
                 data: percent ,
@@ -195,7 +195,7 @@ pending: async (req, res) => {
         let total_no_transction = await mysqlcon(SQL, [user.id]);
         
         let total = total_no_transction[0].count
-        console.log(total_no_transction[0].count)
+        // console.log(total_no_transction[0].count)
 
             // console.log(total_no_transction.length)
 
@@ -209,7 +209,7 @@ pending: async (req, res) => {
                 });
             }
             
-            let percent = (result[0].count/total * 100)
+            let percent = Math.round(result[0].count/total * 100)
             return res.status(200).json({
                 message: 'Total failuer amount of ' + user.name + ' is ' + result[0].amount,
                 data: percent ,
@@ -235,7 +235,7 @@ total: async (req, res) => {
         let deduct = await mysqlcon(sql,user.id)
         // console.log(deduct[0].amount)
           
-        let percent = parseInt(deduct[0].amount/user.wallet * 100)
+        let percent = Math.round(deduct[0].amount/user.wallet * 100)
     
         res.status(200).json({
             message: 'Total amount of ' + user.name + ' is ' + user.wallet,
