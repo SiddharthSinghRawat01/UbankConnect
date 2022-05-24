@@ -1,4 +1,4 @@
-const query = require('../config/mysql');
+const mysqlcon = require('../../../config/db_connection');
 
 const ObjectsToCsv = require('objects-to-csv');
 
@@ -32,147 +32,147 @@ function paginated(result,page){
 
 }
 
-module.exports.show = async function(req,res){
+// module.exports.show = async function(req,res){
 
-    // when login is done by from user than after we will search in merchant transaction table
-    try {
-        let sql ="SELECT order_no,user_id,updated_on,i_flname,ammount,ammount_type,payment_type,settle_amount,status FROM tbl_merchant_transaction  where user_id = 15 ORDER BY TIME(created_on) DESC";
+//     // when login is done by from user than after we will search in merchant transaction table
+//     try {
+//         let sql ="SELECT order_no,user_id,updated_on,i_flname,ammount,ammount_type,payment_type,settle_amount,status FROM tbl_merchant_transaction  where user_id = 15 ORDER BY TIME(created_on) DESC";
 
-        let result = await query(sql)
-        // console.log(result);
+//         let result = await mysqlcon(sql)
+//         // console.log(result);
         
-        let page = req.body.page ? parseInt(req.body.page) : 1
+//         let page = req.body.page ? parseInt(req.body.page) : 1
 
-        let output = await paginated(result,page);
+//         let output = await paginated(result,page);
 
         
-        return res.json(200, {
-            message: `All Deposits Transactions are ${result.length}`,
+//         return res.json(200, {
+//             message: `All Deposits Transactions are ${result.length}`,
     
-            data: {
-                deposits:output
-            }
+//             data: {
+//                 deposits:output
+//             }
 
-        });
+//         });
 
-    } catch (error) {
-        console.log(error)
-        return res.json(500,{
-            message: "error occurered",
-            error: error
-        })
-    }
-
-
-}
-
-module.exports.searchByOrder = async function(req,res){
+//     } catch (error) {
+//         console.log(error)
+//         return res.json(500,{
+//             message: "error occurered",
+//             error: error
+//         })
+//     }
 
 
-    try {
+// }
 
-        let {orderNumber} = req.body;
+// module.exports.searchByOrder = async function(req,res){
 
-        let sql = "SELECT order_no,updated_on,i_flname,ammount,settle_amount,status FROM tbl_merchant_transaction WHERE order_no LIKE ?";
 
-        let result = await query(sql,[orderNumber+"%"]);
+//     try {
 
-        return res.json(200, {
-            message: 'Deposit by order id Transactions',
-            data: {
-                deposits:result
-            }
+//         let {orderNumber} = req.body;
 
-        });
+//         let sql = "SELECT order_no,updated_on,i_flname,ammount,settle_amount,status FROM tbl_merchant_transaction WHERE order_no LIKE ?";
+
+//         let result = await mysqlcon(sql,[orderNumber+"%"]);
+
+//         return res.json(200, {
+//             message: 'Deposit by order id Transactions',
+//             data: {
+//                 deposits:result
+//             }
+
+//         });
         
         
-    } catch (error) {
+//     } catch (error) {
 
-        console.log(error)
-        return res.json(500,{
-            message: "error occurered",
-            error: error
-        })
+//         console.log(error)
+//         return res.json(500,{
+//             message: "error occurered",
+//             error: error
+//         })
         
-    }
+//     }
 
     
 
-}
+// }
 
-module.exports.searchByDate = async function(req,res){
+// module.exports.searchByDate = async function(req,res){
 
-    try {
+//     try {
 
-        let {date} = req.body;
+//         let {date} = req.body;
 
-        let sql = "SELECT order_no,updated_on,i_flname,ammount,settle_amount,status FROM tbl_merchant_transaction WHERE DATE(updated_on) = '"+date+"'";
+//         let sql = "SELECT order_no,updated_on,i_flname,ammount,settle_amount,status FROM tbl_merchant_transaction WHERE DATE(updated_on) = '"+date+"'";
 
-        let result  = await query(sql);
+//         let result  = await mysqlcon(sql);
         
-        let page = req.body.page ? parseInt(req.body.page) : 1
+//         let page = req.body.page ? parseInt(req.body.page) : 1
 
-        let output = await paginated(result,page);
+//         let output = await paginated(result,page);
 
-        return res.json(200, {
-            message: `${result.length} Deposit Transactions for Date ${date}`,
-            data: {
-                deposits:output
-            }
+//         return res.json(200, {
+//             message: `${result.length} Deposit Transactions for Date ${date}`,
+//             data: {
+//                 deposits:output
+//             }
 
-        });
+//         });
         
-    } catch (error) {
+//     } catch (error) {
 
-        console.log(error)
-        return res.json(500,{
-            message: "error occurered",
-            error: error
-        })
+//         console.log(error)
+//         return res.json(500,{
+//             message: "error occurered",
+//             error: error
+//         })
         
-    }
+//     }
   
 
-}
+// }
 
-module.exports.searchByDateRange = async function(req,res){
+// module.exports.searchByDateRange = async function(req,res){
 
-    try {
+//     try {
 
-        let {from,to} = req.body;
+//         let {from,to} = req.body;
 
-        let result = await query("SELECT order_no,updated_on,i_flname,ammount,settle_amount,status FROM tbl_merchant_transaction WHERE DATE_(updated_on) between '"+from+"' AND '"+to+"' "); 
+//         let result = await mysqlcon("SELECT order_no,updated_on,i_flname,ammount,settle_amount,status FROM tbl_merchant_transaction WHERE DATE_(updated_on) between '"+from+"' AND '"+to+"' "); 
        
-        let page = req.body.page ? parseInt(req.body.page) : 1
+//         let page = req.body.page ? parseInt(req.body.page) : 1
 
-        let output = await paginated(result,page);
+//         let output = await paginated(result,page);
 
-        return res.json(200, {
-            message: `${result.length} Deposit Transactions for Date from ${from} to ${to}`,
-            data: {
-                deposits:output
-            }
+//         return res.json(200, {
+//             message: `${result.length} Deposit Transactions for Date from ${from} to ${to}`,
+//             data: {
+//                 deposits:output
+//             }
 
-        });
+//         });
    
         
-    } catch (error) {
+//     } catch (error) {
 
-        console.log(error)
-        return res.json(500,{
-            message: "error occured",
-            error: error
-        })
+//         console.log(error)
+//         return res.json(500,{
+//             message: "error occured",
+//             error: error
+//         })
         
-    }
+//     }
 
     
 
-}
+// }
 
 module.exports.convertToCsv = async function(req,res){
 
-    let result = await query("SELECT order_no,updated_on,i_flname,ammount,ammount_type,payment_type,settle_amount,status FROM tbl_merchant_transaction");
+    let result = await mysqlcon("SELECT order_no,updated_on,i_flname,ammount,ammount_type,payment_type,settle_amount,status FROM tbl_merchant_transaction");
            
     const csv = new ObjectsToCsv(result);
         // Save to file:
@@ -192,7 +192,7 @@ module.exports.filterRecord = async function(req,res){
         
                 let sql1 ="SELECT order_no,user_id,updated_on,i_flname,ammount,ammount_type,payment_type,settle_amount,status FROM tbl_merchant_transaction where user_id = 15";
         
-                let result = await query(sql1);
+                let result = await mysqlcon(sql1);
 
                 console.log(result);
 
@@ -355,7 +355,7 @@ module.exports.filterRecord = async function(req,res){
         
             }
         
-            let result =  await query(sql); 
+            let result =  await mysqlcon(sql); 
 
             let page = parseInt(req.body.page);
 
@@ -384,16 +384,17 @@ module.exports.success = async function(req,res){
 
     try {
 
-        let sql = "SELECT COUNT(*) as total FROM tbl_merchant_transaction";
+        let sql = "SELECT COUNT(*) as total, count(status) as status FROM tbl_merchant_transaction where user_id = 15 ";
 
-        let result =await query(sql);
+
+        let result =await mysqlcon(sql);
         
-
+        console.log(`* ${result[0].total}, status ${result[0].status} `)
         let totalCount = result[0].total;
 
         let sql1 = "SELECT COUNT(*) as total FROM tbl_merchant_transaction WHERE status=1";
 
-        let statusResult = await query(sql1);
+        let statusResult = await con(sql1);
 
             let successCount = statusResult[0].total;
 
@@ -430,13 +431,13 @@ module.exports.declined = async function(req,res){
 
         let sql = "SELECT COUNT(*) as total FROM tbl_merchant_transaction";
 
-        let result = await query(sql); 
+        let result = await mysqlcon(sql); 
 
         let totalCount = result[0].total;
 
-        let sql1 = "SELECT COUNT(*) as total FROM tbl_merchant_transaction WHERE status=0";
+        let sql1 = "SELECT COUNT(*) as total, SUM(ammount) as ammount FROM tbl_merchant_transaction WHERE status=0";
 
-        let declinedResult = await query(sql1);
+        let declinedResult = await mysqlcon(sql1);
 
             let declinedCount = declinedResult[0].total;
 
@@ -469,13 +470,13 @@ module.exports.refund = async function(req,res){
 
         let sql = "SELECT COUNT(*) as total FROM tbl_merchant_transaction";
 
-        let result = await query(sql);
+        let result = await mysqlcon(sql);
 
             let totalCount = result[0].total;
 
             let sql1 = "SELECT COUNT(*) as total FROM tbl_merchant_transaction WHERE status=4";
 
-            let refundResult = await query(sql1);
+            let refundResult = await mysqlcon(sql1);
 
                 let refundCount = refundResult[0].total;
 

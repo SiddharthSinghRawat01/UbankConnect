@@ -1,7 +1,10 @@
 const loginController = require('../modules/login/Controller/loginController');
 const dashbordController = require('../modules/login/Controller/dashbordController');
 const payoutController = require('../modules/login/Controller/payoutController');
+const depositsController = require('../modules/login/Controller/deposits_controller');
+const changePassword = require('../modules/login/Controller/changepasswordControlller');
 const merchant = require('../modules/login/Controller/merchant');
+
 const route = require("express").Router();
 const path = require("path");
 const multer = require("multer");
@@ -71,8 +74,7 @@ route.post('/card_data',uploads.none(),helper.verify, dashbordController.card_da
 
 // Payout Controller
 route.post('/searchByOrderId',uploads.none(), helper.verify, payoutController.searchByOrderId)
-route.post('/today',uploads.none(), helper.verify, payoutController.today)
-// route.post('/yesterday',uploads.none(), helper.verify, payoutController.yesterday)
+route.post('/date',uploads.none(), helper.verify, payoutController.Date)
 route.post('/customDate',uploads.none(), helper.verify, payoutController.customDate)
 route.post('/success',uploads.none(), helper.verify, payoutController.success)
 route.post('/declined',uploads.none(), helper.verify, payoutController.declined)
@@ -80,11 +82,19 @@ route.post('/pending',uploads.none(), helper.verify, payoutController.pending)
 route.post('/total',uploads.none(), helper.verify, payoutController.total)
 route.post('/viewDetails',uploads.none(), helper.verify, payoutController.viewDetails)
 route.post('/downloadReport',uploads.none(), helper.verify, payoutController.downloadReport)
+// Check 
+route.post('/success_1',uploads.none(), helper.verify, depositsController.success)
 
+
+// changepassword
+
+route.post('/changePassword',uploads.single('image'), helper.verify, changePassword.changePassword)
 // Merchant -- Akonto pay 
 route.post('/method1',uploads.single("img1"), helper.verify, merchant.method1)
 // route.get('/method1',uploads.single('img1'), helper.verify, merchant.method1)
 route.post('/method1',uploads.none(), helper.verify, merchant.method1)
+
+
 
 
 module.exports = route;
