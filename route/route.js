@@ -3,6 +3,9 @@ const dashbordController = require('../modules/login/Controller/dashbordControll
 const payoutController = require('../modules/login/Controller/payoutController');
 const depositsController = require('../modules/login/Controller/deposits_controller');
 const changePassword = require('../modules/login/Controller/changepasswordControlller');
+const teamsController = require('../modules/login/Controller/teamsController');
+
+// Akonto Pay -- 
 const merchant = require('../modules/login/Controller/merchant');
 
 const route = require("express").Router();
@@ -89,10 +92,12 @@ route.post('/success_1',uploads.none(), helper.verify, depositsController.succes
 // changepassword
 
 route.post('/changePassword',uploads.single('image'), helper.verify, changePassword.changePassword)
+
+
+
 // Merchant -- Akonto pay 
-route.post('/method1',uploads.single("img1"), helper.verify, merchant.method1)
-// route.get('/method1',uploads.single('img1'), helper.verify, merchant.method1)
-route.post('/method1',uploads.none(), helper.verify, merchant.method1)
+// route.post('/method1',uploads.single("img1"), helper.verify, merchant.method1)
+// route.post('/method1',uploads.none(), helper.verify, merchant.method1)
 
 
 
