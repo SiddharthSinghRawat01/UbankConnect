@@ -93,6 +93,7 @@ route.post('/downloadReport',uploads.none(), helper.verify, payoutController.dow
 
 // settelment routes
 route.post('/settelmetnt_Trans',uploads.none(), helper.verify,settelmentController.settelmetnt_Trans);
+route.post('/requestSettlement',uploads.none(), helper.verify,settelmentController.requestSettlement);
 
 
 // changepassword

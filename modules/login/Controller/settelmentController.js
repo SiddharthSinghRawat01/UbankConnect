@@ -1,4 +1,7 @@
 const mysqlcon = require('../../../config/db_connection');
+const dateTime = require('node-datetime');
+const Date = dateTime.create();
+const date_format = Date.format('ymd');
 
 const settelment = {
 
@@ -20,21 +23,17 @@ settelmetnt_Trans: async (req,res)=>{
 
     try {
 
-        let sql1 = 'SELECT * FROM tbl_settlement WHERE user_id = ?';
+        let sql1 = 'SELECT count(*) as count,SUM(requestedAmount) as request,SUM(charges) as charges,SUM(settlementAmount) as amount FROM tbl_settlement WHERE user_id = ? ORDER BY id ASC';
         let result =  await mysqlcon(sql1,user_id)
 
-        // console.log(result[0].requestedAmount)
-        let requestedAmount = 0;
-        let charges = 0
-        let settlementAmount = 0
-        for(let i =0; i<result.length; i++){
-            requestedAmount += result[i].requestedAmount
-            charges += result[i].charges
-            settlementAmount += result[i].settlementAmount
-        }
-
+        // console.log(result[0].requestedAmount) ICONS
+        let requestedAmount = result[0].request;
+        let charges = result[0].charges
+        let settlementAmount = result[0].amount
+        console.log(result[0].count)
+       
         // paginenation
-        let total = result.length
+        let total = result[0].count
         let Page = req.body.page ? Number(req.body.page) : 1
         let page = await pagination(total,Page);
 
@@ -43,18 +42,15 @@ settelmetnt_Trans: async (req,res)=>{
         // console.log(result)
 
         let data
-        if(!from && !to){
-            let sql = 'SELECT * FROM tbl_settlement WHERE user_id = ? AND DATE(created_on) = DATE(NOW()) LIMIT ?,?';
+        if(from == undefined && to == undefined){
+            let sql = 'SELECT * FROM tbl_settlement WHERE user_id = ? AND DATE(created_on) = DATE(NOW()) LIMIT ?,? ORDER BY id ASC';
             data = await mysqlcon(sql,[user_id,page.start,page.limit]);
         }else{
-            let sql = 'SELECT * FROM tbl_settlement WHERE user_id = ? AND DATE(created_on) >= ? AND DATE(created_on) <= ? LIMIT ?,?';
+            let sql = 'SELECT * FROM tbl_settlement WHERE user_id = ? AND DATE(created_on) >= ? AND DATE(created_on) <= ? LIMIT ?,? ORDER BY id ASC';
             data = await mysqlcon(sql,[user_id,from,to,page.start,page.limit]);
         }
         
-
-        console.log(data)
-
-
+        // console.log(data)
 
         return res.json(200,{
             message: "settelment transaston",
@@ -80,33 +76,62 @@ settelmetnt_Trans: async (req,res)=>{
 
 
 // need to find exchange rate in databse in percentage
-requestSettlement : (req,res)=>{
+requestSettlement : async (req,res)=>{
     let user = req.user
     // user.fee_charge  
     let user_id = user.id
     let request = req.body
-    let Settlement = {
-        settelmentID: request.settelmentId,
-        settelmentType: request.settelmentType,
-        fromCurrency: request.fromCurrency,
-        toCurrency: request.toCurrency,
-        walletAdd: request.walletAddress,
-        accNo: request.accountNumber,
-        bankName: request.bankName,
-        branchname: request.branchName,
-        city: request.city,
-        country: request.country,
-        code: request.swiftCode,
-        requestedAmmount: request.requestedAmount,
-        Charges: request.charges,
-        ExchangeRate: request.exchangeRate,
-    }
+    
 
     try {
-        
 
-        let sql = "INSERT INTO tbl_settlement SET ? WHERE user_id = ?"
+        let sql = "SELECT fee_charge FROM tbl_user where id = ? ORDER BY id ASC"
+        let charge = await mysqlcon(sql,user_id);
+        // console.log(charge[0].fee_charge)
+        let charges = charge[0].fee_charge
 
+        let sql1 = "SELECT rate FROM tbl_settled_currency WHERE deposit_currency = ? ORDER BY id ASC"
+        let rate = await mysqlcon(sql1,request.currency);
+         console.log(rate)
+
+         let total_charges = request.requestedAmount-(request.requestedAmount*charge[0].fee_charge/100);
+         let Settlement_Ammount = total_charges/rate[0].rate;
+
+         let Settlement = {
+            user_id: user_id,
+            settlementId: date_format, // id = date
+            settlementType: request.settelmentType,
+            fromCurrency: request.currency, // like USD 
+            toCurrency: request.toCurrency,
+            walletAddress: request.walletAddress,
+            accountNumber: request.accountNumber,
+            bankName: request.bankName,
+            branchName: request.branchName,
+            city: request.city,
+            country: request.country,
+            swiftCode: request.swiftCode,
+            requestedAmount: request.requestedAmount,
+            charges: charge[0].fee_charge, // This will go from 'sql' tbl_user
+            exchangeRate: rate[0].rate, //  This will go from 'sql' tbl_settle_currency
+            totalCharges: total_charges,// formula
+            settlementAmount: Settlement_Ammount// formula
+
+        }
+
+        let sql2 = "INSERT INTO tbl_settlement SET ?"
+        let result = await mysqlcon(sql2,[Settlement,user_id]);
+
+        console.log(result)
+
+        return res.status(200).json({
+            message: "Request settelment transaston",
+            Charges: charges,
+            settlementId: date_format,
+            "Exchange Rate": rate[0].rate,
+            "requested": request.requestedAmount,
+            "total charges": total_charges,
+            "Exchange Rate": Settlement_Ammount
+        })
 
     } catch (error) {
         console.log(error)
