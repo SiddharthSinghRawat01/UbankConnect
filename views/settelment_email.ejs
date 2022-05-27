@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+  <head>                                                  
+     <style>
+  
+    body{
+      display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+      table {
+        width: 100%;
+        border: 2px solid black;
+        border-collapse: collapse;
+        text-align: center;
+      }
+                                         
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+      td{                                                                 
+        border: 1px solid black;
+      }
+
+      
+      .heading {
+        background-color: rgb(4, 4, 212);
+        width: 108%;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
+        text-align: center;
+        
+      }                                                                       
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
+      .border{
+        border: 1px solid black !important;                                                                                                                                                                                                                                                                                                     
+      }                                                   
+      
+      .container {                                                                                                                                                                                                                                                                                                                                                                                                                        
+        display: flex;                                                                                                                                                              
+        justify-content: center;
+        align-items: center;
+     
+        width: 20rem;
+        
+        flex-direction: column;
+      }
+      .footer {
+        background-color: rgb(16, 16, 153);
+      }
+      .link{
+        background-color:gray;
+        padding: 40px;
+    
+      }
+      .last{
+        background-color:blue;
+  
+          padding: 40px;
+      }
+
+    </style>
+  </head>
+  <body>
+   
+    <div class="container">
+      <img src="./logo (1).png" alt="logo"width="150">
+      <div class="heading">
+        <img src="./im1.png" alt="message image"width="150" height="40">
+        <h3>THANKS FOR SIGNING UP!</h3>
+
+        <h1>Settlement Request</h1>
+      </div>
+
+      <table>
+        <tr>
+          <td>SettlementId</td>
+          <td><%= Settelment.settlementId %></td>
+        </tr>
+        <tr>
+          <td>SettelementType</td>
+          <td><%= Settelment.settlementType %> </td>
+        </tr>
+        <tr>
+          <td>fromCurrency</td>
+          <td><%= Settelment.fromCurrency %></td>
+        </tr>
+        <tr>
+          <td>toCurrency</td>
+          <td><%= Settelment.toCurrency %></td>
+        </tr>
+      
+        <tr>
+          <td>WalletAddress</td>
+          <td><%= Settelment.walletAddress %></td>
+        </tr>
+      
+        <tr>
+          <td>accountNumber</td>
+          <td><%= Settelment.accountNumber %></td>
+        </tr>
+      
+        <tr>
+          <td>bankname</td>
+          <td><%= Settelment.bankName %></td>
+        </tr>
+      
+        <tr>
+          <td>branchname
+          </th>
+          <td><%= Settelment.branchName %></td>
+        </tr>
+        <tr>
+          <td>city</td>
+          <td><%= Settelment.city %></td>
+        </tr>
+        <tr>
+          <td>country</td>
+          <td><%= Settelment.country %></td>
+        </tr>
+        <tr>
+          <td>swiftcode</td>
+          <td><%= Settelment.swiftCode %></td>
+        </tr>
+        <tr>
+          <td>requestedAmount</th>
+          <td><%= Settelment.requestedAmount %></td>
+        </tr>
+        <tr>
+          <td>charges</td>
+          <td><%= Settelment.charges ></td>
+        </tr>
+        <tr>
+          <td>exchangesRate</td>
+          <td><%= Settelment.exchangeRate %></td>
+        </tr>
+        <tr>
+          <td>totalcharges</td>
+          <td><%= Settelment.totalCharges %></td>
+        </tr>
+        <tr>
+          <td>settlementAmount</td>
+          <td><%= Settelment.settlementAmount %></td>
+        </tr>
+      
+      </table>
+      <p>Thanks</p>
+      <div class="footer">
+        <div class="link">
+          <a href="<%=url%>">support@urbankconnect.com</a>
+        </div>
+        <div class="last">Copyright&copy;U Bank Connect.All Right Reserved</div></div>
+    </div>
+  </body>
+</html>
+                    
