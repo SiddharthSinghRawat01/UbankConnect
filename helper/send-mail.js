@@ -10,7 +10,8 @@ let transporter = nodemailer.createTransport({
     auth: {
         user: 'rampraveshsingh1996@gmail.com',
         pass: 'PpppP12345'
-    }
+    },
+    tls: {rejectUnauthorized: false}
 });
 
 
@@ -34,6 +35,27 @@ let renderTemplate = (data, relativePath) => {
 module.exports.mail = (url,email) =>{
 
     let htmlString = renderTemplate({url: url}, 'email.ejs'); 
+    transporter.sendMail({
+        
+        from: 'rampraveshsingh1996@gmail.com',
+        to: email,
+        subject: "Checking that email is sending or not",
+        html: htmlString
+
+    }, (err, info) => {
+        if(err){
+            console.log('Error in sending mail', err);
+            return;
+        }
+
+        console.log('Message sent', info);
+        return;
+    })
+}
+
+module.exports.invoiceMail = (url,settlement,email) =>{
+
+    let htmlString = renderTemplate({url : url ,settlement: settlement}, 'settelment_email.ejs'); 
     transporter.sendMail({
         
         from: 'rampraveshsingh1996@gmail.com',

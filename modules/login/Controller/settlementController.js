@@ -1,12 +1,13 @@
 const mysqlcon = require('../../../config/db_connection');
+const send_mail = require('../../../helper/send-mail')
 const dateTime = require('node-datetime');
 const Date = dateTime.create();
 const date_format = Date.format('ymd');
 
-const settelment = {
+const settlement = {
 
  
-settelmetnt_Trans: async (req,res)=>{
+settlemetnt_Trans: async (req,res)=>{
 
     let user = req.user
     let user_id = user.id
@@ -53,7 +54,7 @@ settelmetnt_Trans: async (req,res)=>{
         // console.log(data)
 
         return res.json(200,{
-            message: "settelment transaston",
+            message: "settlement transaston",
             data: data,
             "total settel req": requestedAmount,
             charges: charges,
@@ -90,8 +91,14 @@ requestSettlement : async (req,res)=>{
         // console.log(charge[0].fee_charge)
         let charges = charge[0].fee_charge
 
+        // currrency send
+        let currency = request.currency
+        if(currency === undefined){
+            return res.send("select currency")
+        }
+
         let sql1 = "SELECT rate FROM tbl_settled_currency WHERE deposit_currency = ? ORDER BY id ASC"
-        let rate = await mysqlcon(sql1,request.currency);
+        let rate = await mysqlcon(sql1,currency);
          console.log(rate)
 
          let total_charges = request.requestedAmount-(request.requestedAmount*charge[0].fee_charge/100);
@@ -100,8 +107,8 @@ requestSettlement : async (req,res)=>{
          let Settlement = {
             user_id: user_id,
             settlementId: date_format, // id = date
-            settlementType: request.settelmentType,
-            fromCurrency: request.currency, // like USD 
+            settlementType: request.settlementType,
+            fromCurrency: currency, // like USD 
             toCurrency: request.toCurrency,
             walletAddress: request.walletAddress,
             accountNumber: request.accountNumber,
@@ -119,12 +126,14 @@ requestSettlement : async (req,res)=>{
         }
 
         let sql2 = "INSERT INTO tbl_settlement SET ?"
-        let result = await mysqlcon(sql2,[Settlement,user_id]);
+        let result = await mysqlcon(sql2,Settlement);
 
-        console.log(result)
+        console.log(user.email)
+
+        // let mail = send_mail.invoiceMail('www.google.com',Settlement,user.email);
 
         return res.status(200).json({
-            message: "Request settelment transaston",
+            message: "Request settlement transaston",
             Charges: charges,
             settlementId: date_format,
             "Exchange Rate": rate[0].rate,
@@ -147,4 +156,4 @@ requestSettlement : async (req,res)=>{
 
 }
 
-module.exports = settelment
+module.exports = settlement

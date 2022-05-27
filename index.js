@@ -1,7 +1,12 @@
 const express = require('express');
 const app = express();
 const port = 9240;
+const ejs = require('ejs');
 const config = require('./config/config.js');
+
+//ejs
+app.set('view engine', 'ejs');
+app.set('views', './views')
 
 // routing
 app.use(require('./route/route'));

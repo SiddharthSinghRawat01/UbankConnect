@@ -1,12 +1,16 @@
 const loginController = require('../modules/login/Controller/loginController');
 const dashbordController = require('../modules/login/Controller/dashbordController');
 const payoutController = require('../modules/login/Controller/payoutController');
-const depositsController = require('../modules/login/Controller/depositsController')
-const changePassword = require('../modules/login/Controller/changepasswordControlller')
-const settelmentController = require('../modules/login/Controller/settelmentController')
+const depositsController = require('../modules/login/Controller/depositsController');
+const changePassword = require('../modules/login/Controller/changepasswordControlller');
+const settlementController = require('../modules/login/Controller/settlementController');
+const invoiceController = require('../modules/login/Controller/invoiceController')
 const route = require("express").Router();
 const path = require("path");
 const multer = require("multer");
+
+
+
 
 var storage = multer.diskStorage({
     destination : function(req, file, cb){
@@ -92,9 +96,11 @@ route.post('/viewDetails',uploads.none(), helper.verify, payoutController.viewDe
 route.post('/downloadReport',uploads.none(), helper.verify, payoutController.downloadReport)
 
 // settelment routes
-route.post('/settelmetnt_Trans',uploads.none(), helper.verify,settelmentController.settelmetnt_Trans);
-route.post('/requestSettlement',uploads.none(), helper.verify,settelmentController.requestSettlement);
+route.post('/settlemetnt_Trans',uploads.none(), helper.verify,settlementController.settlemetnt_Trans);
+route.post('/requestSettlement',uploads.none(), helper.verify,settlementController.requestSettlement);
 
+// invoice
+route.post('/invoice',uploads.none(), helper.verify,invoiceController.allInvoice);
 
 // changepassword
 
