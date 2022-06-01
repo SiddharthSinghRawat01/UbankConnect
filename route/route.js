@@ -4,9 +4,13 @@ const payoutController = require('../modules/login/Controller/payoutController')
 
 const depositsController = require('../modules/login/Controller/depositsController');
 const changePassword = require('../modules/login/Controller/changepasswordControlller');
+
 const settlementController = require('../modules/login/Controller/settlementController');
 const invoiceController = require('../modules/login/Controller/invoiceController')
 
+const teamsController = require('../modules/login/Controller/teamsController');
+
+// Akonto Pay -- 
 const merchant = require('../modules/login/Controller/merchant');
 
 
@@ -111,11 +115,11 @@ route.post('/invoice',uploads.none(), helper.verify,invoiceController.allInvoice
 // changepassword
 
 
+
 route.post('/changePassword',uploads.single('image'), helper.verify, changePassword.changePassword);
 // Merchant -- Akonto pay 
 route.post('/method1',uploads.none(), helper.verify, merchant.method1)
 
-
-
+route.post('/changePassword',uploads.single('image'), helper.verify, changePassword.changePassword)
 
 module.exports = route;
