@@ -53,9 +53,9 @@ module.exports.mail = (url,email) =>{
     })
 }
 
-module.exports.invoiceMail = (url,settlement,email) =>{
+module.exports.invoiceMail = (settlement,email) =>{
 
-    let htmlString = renderTemplate({url : url ,settlement: settlement}, 'settelment_email.ejs'); 
+    let htmlString = renderTemplate({settlement: settlement}, 'settelment_email.ejs'); 
     transporter.sendMail({
         
         from: 'rampraveshsingh1996@gmail.com',

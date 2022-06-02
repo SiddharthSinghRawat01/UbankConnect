@@ -1,7 +1,7 @@
 const mysqlcon = require('../../../config/db_connection');
 const dateTime = require('node-datetime');
 const Date = dateTime.create();
-const date_format = Date.format('ymd');
+const date_format = Date.format('d/m/y');
 
 const Invoice = {
 
@@ -9,10 +9,10 @@ const Invoice = {
 allInvoice: async (req,res)=>{
 
     let user = req.user
-    let user_id = user.id
-    let { from,to } = req.body
+    let merchant_id = user.id
+    // let { from,to } = req.body
     
-    console.log(from+" to "+ to )
+    // console.log(from+" to "+ to )
 
     let pagination = (total,page)=>{
         let limit = 15;
@@ -22,39 +22,27 @@ allInvoice: async (req,res)=>{
     }
 
     try {
+            
+        //icon
+        let sql = 'SELECT count(*) as all_invoice,(SELECT sum(amount) FROM tbl_user_invoice WHERE merchant_id = ? AND pay_status = 1) as paid_ammount, (SELECT sum(amount) FROM tbl_user_invoice WHERE merchant_id = ? AND pay_status = 0) as unpaid_amount,(SELECT sum(amount) FROM tbl_user_invoice WHERE merchant_id = ? AND pay_status = 0 AND date(due_date) < date(now()) ) as due_amount FROM tbl_user_invoice WHERE merchant_id = ?';
 
-        let sql1 = 'SELECT * FROM tbl_user_invoice WHERE merchant_id = ? ORDER BY id ASC';
-        let result =  await mysqlcon(sql1,user_id)
+        let icon =  await mysqlcon(sql,[merchant_id,merchant_id,merchant_id,merchant_id]);
 
-        // console.log(result[0].requestedAmount) ICONS
-        // let requestedAmount = result[0].request;
-        // let charges = result[0].charges
-        // let settlementAmount = result[0].amount
-        console.log(result)
-       
-        // // paginenation
-        // let total = result[0].count
-        // let Page = req.body.page ? Number(req.body.page) : 1
-        // let page = await pagination(total,Page);
+        //page
+        pagination(icon[0].all_invoice,req.body.page);
 
-        // console.log("total"+total)
-        // console.log(page)
-        // // console.log(result)
-
-        // let data
-        // if(from == undefined && to == undefined){
-        //     let sql = 'SELECT * FROM tbl_settlement WHERE user_id = ? AND DATE(created_on) = DATE(NOW()) LIMIT ?,? ORDER BY id ASC';
-        //     data = await mysqlcon(sql,[user_id,page.start,page.limit]);
-        // }else{
-        //     let sql = 'SELECT * FROM tbl_settlement WHERE user_id = ? AND DATE(created_on) >= ? AND DATE(created_on) <= ? LIMIT ?,? ORDER BY id ASC';
-        //     data = await mysqlcon(sql,[user_id,from,to,page.start,page.limit]);
-        // }
+        //data
+        let sql1 = 'SELECT invoice_no,send_date,due_date,email,amount,tax_amount,pay_status FROM tbl_user_invoice where merchant_id = ?'
         
-        // console.log(data)
+        let data = await mysqlcon(sql1,merchant_id);
+
+        //
+
 
         return res.json(200,{
             message: "settelment transaston",
-            allinvoice: result
+            allinvoice: icon,
+            data: data
         })
         
 

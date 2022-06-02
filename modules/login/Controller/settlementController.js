@@ -2,7 +2,7 @@ const mysqlcon = require('../../../config/db_connection');
 const send_mail = require('../../../helper/send-mail')
 const dateTime = require('node-datetime');
 const Date = dateTime.create();
-const date_format = Date.format('ymd');
+const date_format = Date.format('ymdTHHMMSS');
 
 const settlement = {
 
@@ -125,12 +125,38 @@ requestSettlement : async (req,res)=>{
 
         }
 
+        if(Settlement.settlementType === "CRYPTO"){
+            Settlement = {
+                user_id: user_id,
+                settlementId: date_format, // id = date
+                settlementType: request.settlementType,
+                fromCurrency: currency, // like USD 
+                toCurrency: request.toCurrency,
+                walletAddress: ' ',
+                accountNumber: ' ',
+                bankName: ' ',
+                branchName: ' ',
+                city: ' ',
+                country: ' ',
+                swiftCode: ' ',
+                requestedAmount: request.requestedAmount,
+                charges: charge[0].fee_charge, // This will go from 'sql' tbl_user
+                exchangeRate: rate[0].rate, //  This will go from 'sql' tbl_settle_currency
+                totalCharges: total_charges,// formula
+                settlementAmount: Settlement_Ammount// formula
+    
+            }
+        }
+
         let sql2 = "INSERT INTO tbl_settlement SET ?"
         let result = await mysqlcon(sql2,Settlement);
 
         console.log(user.email)
 
-        // let mail = send_mail.invoiceMail('www.google.com',Settlement,user.email);
+        // console.log(Settlement.settlementId)
+        // console.log(Settlement.totalCharges)
+
+        // let mail = send_mail.invoiceMail(Settlement,user.email);
 
         return res.status(200).json({
             message: "Request settlement transaston",

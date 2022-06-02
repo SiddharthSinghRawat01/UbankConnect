@@ -10,7 +10,21 @@ let pagination = (total,page)=>{
 }
 
 const payoutMethods = {
-    
+
+payout: async (req,res)=>{
+let user = req.user;
+
+    try {
+        
+        let sql = 'SELECT COUNT(*) AS Total FROM tbl_icici_payout_transaction_response_details WHERE DATE(created_on) = ? AND users_id = ?';
+
+    } catch (err) {
+        
+    }
+
+},
+ 
+
 searchByOrderId: async (req, res) => {
     let user = req.user;
     try {
