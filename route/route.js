@@ -101,6 +101,7 @@ route.post('/requestSettlement',uploads.none(), helper.verify,settlementControll
 
 // invoice
 route.post('/invoice',uploads.none(), helper.verify,invoiceController.allInvoice);
+route.post('/new_invoice',uploads.none(),helper.verify,invoiceController.new_invoice);
 
 // changepassword
 
