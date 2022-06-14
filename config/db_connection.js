@@ -1,5 +1,5 @@
 const config = require("./config");
-const util = require("util");
+const util = require("util"); // it is used for to use promisis with mysql
 
 // Mongo DB Connection
 

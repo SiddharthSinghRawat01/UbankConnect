@@ -11,7 +11,7 @@ allInvoice: async (req,res)=>{
 
     let user = req.user
     let merchant_id = user.id
-    // let { from,to } = req.body
+    let { from,to,today,yesterday,paid,unpaid,due } = req.body
     
     // console.log(from+" to "+ to )
 
@@ -25,6 +25,7 @@ allInvoice: async (req,res)=>{
     try {
             
         //icon
+        // getting paid unpaid and due ammount
         let sql = 'SELECT count(*) as all_invoice,(SELECT sum(amount) FROM tbl_user_invoice WHERE merchant_id = ? AND pay_status = 1) as paid_ammount, (SELECT sum(amount) FROM tbl_user_invoice WHERE merchant_id = ? AND pay_status = 0) as unpaid_amount,(SELECT sum(amount) FROM tbl_user_invoice WHERE merchant_id = ? AND pay_status = 0 AND date(due_date) < date(now()) ) as due_amount FROM tbl_user_invoice WHERE merchant_id = ?';
 
         let icon =  await mysqlcon(sql,[merchant_id,merchant_id,merchant_id,merchant_id]);
@@ -37,59 +38,59 @@ allInvoice: async (req,res)=>{
 
 
         // today
-        if(req.body.date === '1'){
+        if(today){
             console.log('1')
             sql1 += 'AND DATE(created_on) = date(now())'
         }
         // yesterday
-        if(req.body.date === '2'){
+        if(yesterday){
             console.log('2')
-            sql1 += 'AND DATE(created_on) = date_sub(date(now()),interval 1 day)'
+            sql1 += 'AND DATE(created_on) = date_sub(date(now() -   9 interval 1 day))'
         }
         // in between period
-        if(req.body.from && req.body.to){
+        if(from && to){
             console.log('3')
             sql1 += 'AND DATE(created_on) >= "'+req.body.from+'" AND DATE(created_on) <= "'+req.body.to+'"'
         }
 
         //filter
  
-         if(req.body.paid === '1' && req.body.unpaid !== '1' &&req.body.due !== '1'){
+         if(paid && !unpaid && !due){
             console.log('1')
              sql1 += ' AND pay_status = 1'
              console.log(sql1)
          }
-         if(req.body.paid !== '1' && req.body.unpaid === '1' &&req.body.due !== '1'){
+         if(!paid && unpaid && !due ){
             console.log('2')
             sql1 += ' AND pay_status = 0'
             console.log(sql1)
         }
 
-        if(req.body.paid === '1' && req.body.unpaid === '1' &&req.body.due !== '1'){
+        if(paid && unpaid && !due){
             console.log('2')
             sql1 
             console.log(sql1)
         }
 
-        if(req.body.paid !== '1' && req.body.unpaid !== '1' &&req.body.due === '1'){
+        if(!paid && !unpaid && due ){
             console.log('3')
             sql1 += ' AND  DATE(due_date) < DATE(now())'
             console.log(sql1)
         }
 
-        if(req.body.paid === '1' && req.body.unpaid !== '1' &&req.body.due === '1'){
+        if(paid && !unpaid && due ){
             console.log('3')
             sql1 += ' AND  DATE(due_date) < DATE(now()) AND pay_status = 1'
             console.log(sql1)
         }
 
-        if(req.body.paid !== '1' && req.body.unpaid === '1' &&req.body.due === '1'){
+        if(!paid && unpaid && due){
             console.log('3')
             sql1 += ' AND  DATE(due_date) < DATE(now()) AND pay_status = 0'
             console.log(sql1)
         }
 
-        if(req.body.paid === '1' && req.body.unpaid === '1' &&req.body.due === '1'){
+        if(paid && unpaid && due){
             console.log('3')
             sql1
             console.log(sql1)
@@ -99,7 +100,6 @@ allInvoice: async (req,res)=>{
         let data = await mysqlcon(sql1,merchant_id);
 
         
-
         return res.json(200,{
             message: "settelment transaston",
             allinvoice: icon,

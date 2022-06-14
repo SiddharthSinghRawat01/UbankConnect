@@ -11,7 +11,7 @@ settlemetnt_Trans: async (req,res)=>{
 
     let user = req.user
     let user_id = user.id
-    let { from,to } = req.body
+    let { from,to,today,yestarday } = req.body
     
     console.log(from+" to "+ to )
 
@@ -43,24 +43,32 @@ settlemetnt_Trans: async (req,res)=>{
         // console.log(result)
 
         let data
-        if(from == undefined && to == undefined){
-            let sql = 'SELECT * FROM tbl_settlement WHERE user_id = ? AND DATE(created_on) = DATE(NOW()) LIMIT ?,? ORDER BY id ASC';
+        if(today){
+            let sql = 'SELECT * FROM tbl_settlement WHERE user_id = ? AND DATE(created_on) = DATE(NOW()) LIMIT ?,?';
             data = await mysqlcon(sql,[user_id,page.start,page.limit]);
-        }else{
-            let sql = 'SELECT * FROM tbl_settlement WHERE user_id = ? AND DATE(created_on) >= ? AND DATE(created_on) <= ? LIMIT ?,? ORDER BY id ASC';
+        } else if(yestarday){
+            let sql = 'SELECT * FROM tbl_settlement WHERE user_id = ? AND DATE(created_on) = DATE(NOW() - INTERVAL 1 DAY) LIMIT ?,?';
+            data = await mysqlcon(sql,[user_id,page.start,page.limit]);
+        }else if (from && to){
+            let sql = 'SELECT * FROM tbl_settlement WHERE user_id = ? AND DATE(created_on) >= ? AND DATE(created_on) <= ? LIMIT ?,?';
             data = await mysqlcon(sql,[user_id,from,to,page.start,page.limit]);
+        }else{
+            let sql = 'SELECT * FROM tbl_settlement WHERE user_id = ? LIMIT ?,?';
+            data = await mysqlcon(sql,[user_id,page.start,page.limit]);
         }
         
         // console.log(data)
 
         return res.json(200,{
             message: "settlement transaston",
+
+            card : [{total_settel_req : requestedAmount},
+
+            {charges : charges},
+            
+           { amount_sent_recived : settlementAmount}],
+
             data: data,
-            "total settel req": requestedAmount,
-            charges: charges,
-            "amount sent/recived": settlementAmount
-
-
         })
         
 
@@ -153,8 +161,7 @@ requestSettlement : async (req,res)=>{
 
         console.log(user.email)
 
-        // console.log(Settlement.settlementId)
-        // console.log(Settlement.totalCharges)
+  
 
         // let mail = send_mail.invoiceMail(Settlement,user.email);
 
